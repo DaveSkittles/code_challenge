@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Claims List - Medical Claims Review{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-list-ul"></i> Medical Claims</h1>
+            <a href="{% url 'index' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-house"></i> Dashboard
+            </a>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form hx-get="{% url 'claim_list' %}" hx-target="#claims-table" hx-trigger="input changed delay:300ms, change">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="search" 
+                                   name="search" 
+                                   placeholder="Claim ID, Patient Name, or Insurer..."
+                                   value="{{ search_query }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Statuses</option>
+                                {% for value, label in status_choices %}
+                                    <option value="{{ value }}" {% if value == status_filter %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="flagged" class="form-label">Flagged Status</label>
+                            <select class="form-select" id="flagged" name="flagged">
+                                <option value="">All Claims</option>
+                                <option value="true" {% if flagged_filter == 'true' %}selected{% endif %}>Flagged Only</option>
+                                <option value="false" {% if flagged_filter == 'false' %}selected{% endif %}>Not Flagged</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                                <i class="bi bi-x-circle"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Claims Table -->
+        <div id="claims-table">
+            {% include 'claims/partials/claim_list.html' %}
+        </div>
+    </div>
+</div>
+
+<!-- Claim Detail Modal -->
+<div class="modal fade" id="claimModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div id="claim-detail-content">
+                <!-- Content loaded via HTMX -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function clearFilters() {
+    document.getElementById('search').value = '';
+    document.getElementById('status').value = '';
+    document.getElementById('flagged').value = '';
+    // Trigger HTMX request to reload
+    htmx.trigger('#search', 'input');
+}
+
+// Show modal when claim detail is loaded
+document.body.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target.id === 'claim-detail-content') {
+        var modal = new bootstrap.Modal(document.getElementById('claimModal'));
+        modal.show();
+    }
+});
+</script>
+{% endblock %} 

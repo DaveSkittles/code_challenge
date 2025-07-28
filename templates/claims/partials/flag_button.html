@@ -1,0 +1,13 @@
+<div x-data="{ flagged: {{ claim.flagged_for_review|yesno:'true,false' }} }">
+    <button class="btn btn-sm" 
+            :class="flagged ? 'btn-warning' : 'btn-outline-secondary'"
+            hx-post="{% url 'toggle_flag' claim.id %}"
+            hx-target="closest div"
+            hx-swap="outerHTML"
+            @click="flagged = !flagged"
+            type="button">
+        <i class="bi" 
+           :class="flagged ? 'bi-flag-fill' : 'bi-flag'"></i>
+        <span x-text="flagged ? 'Flagged' : 'Flag'"></span>
+    </button>
+</div> 

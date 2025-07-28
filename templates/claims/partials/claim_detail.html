@@ -1,0 +1,177 @@
+<div class="modal-header">
+    <h5 class="modal-title">
+        <i class="bi bi-file-earmark-medical"></i> 
+        Claim Details - {{ claim.claim_id }}
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <div class="row">
+        <!-- Left Column - Basic Info -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-person"></i> Patient Information</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td class="fw-bold">Patient Name:</td>
+                            <td>{{ claim.patient_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Service Date:</td>
+                            <td>{{ claim.service_date|date:"M d, Y" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Provider:</td>
+                            <td>{{ claim.provider_name }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-currency-dollar"></i> Financial Details</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td class="fw-bold">Billed Amount:</td>
+                            <td class="text-end">${{ claim.billed_amount|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Paid Amount:</td>
+                            <td class="text-end">${{ claim.paid_amount|floatformat:2 }}</td>
+                        </tr>
+                        <tr class="table-warning">
+                            <td class="fw-bold">Underpaid Amount:</td>
+                            <td class="text-end fw-bold">
+                                ${{ claim.underpaid_amount|floatformat:2 }}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Medical & Status Info -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-shield"></i> Insurance Information</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Insurer:</strong> {{ claim.insurer_name }}</p>
+                    <p><strong>Status:</strong> 
+                        {% if claim.status == 'approved' %}
+                            <span class="badge bg-success">{{ claim.get_status_display }}</span>
+                        {% elif claim.status == 'denied' %}
+                            <span class="badge bg-danger">{{ claim.get_status_display }}</span>
+                        {% elif claim.status == 'underpaid' %}
+                            <span class="badge bg-warning">{{ claim.get_status_display }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ claim.get_status_display }}</span>
+                        {% endif %}
+                    </p>
+                    {% if claim.denial_reason %}
+                    <p><strong>Denial Reason:</strong></p>
+                    <div class="alert alert-warning">
+                        {{ claim.denial_reason }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-code-square"></i> Medical Codes</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>CPT Codes:</strong>
+                        <div class="mt-1">
+                            {% for code in claim.cpt_codes %}
+                                <span class="badge bg-primary me-1">{{ code }}</span>
+                            {% empty %}
+                                <span class="text-muted">No CPT codes</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Diagnosis Codes:</strong>
+                        <div class="mt-1">
+                            {% for code in claim.diagnosis_codes %}
+                                <span class="badge bg-info me-1">{{ code }}</span>
+                            {% empty %}
+                                <span class="text-muted">No diagnosis codes</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flag Status -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Review Status:</strong>
+                        <span class="ms-2">
+                            {% if claim.flagged_for_review %}
+                                <i class="bi bi-flag-fill text-warning"></i> Flagged for Review
+                            {% else %}
+                                <i class="bi bi-flag text-muted"></i> Not Flagged
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% include 'claims/partials/flag_button.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Annotations Section -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-chat-left-text"></i> Annotations</h6>
+                </div>
+                <div class="card-body">
+                    <!-- Add Annotation Form -->
+                    <form hx-post="{% url 'add_annotation' claim.id %}"
+                          hx-target="#annotations-list"
+                          hx-swap="afterbegin"
+                          class="mb-3">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <textarea class="form-control" 
+                                      name="content" 
+                                      placeholder="Add your annotation here..."
+                                      rows="2"
+                                      required></textarea>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-plus-circle"></i> Add
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Annotations List -->
+                    <div id="annotations-list">
+                        {% include 'claims/partials/annotations_list.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+</div> 

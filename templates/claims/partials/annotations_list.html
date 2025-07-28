@@ -1,0 +1,9 @@
+<!-- Annotations List -->
+{% for annotation in annotations %}
+    {% include 'claims/partials/annotation_item.html' %}
+{% empty %}
+<div class="text-center py-3 text-muted">
+    <i class="bi bi-chat-left text-muted" style="font-size: 1.5rem;"></i>
+    <p class="mb-0 mt-2">No annotations yet. Add the first one above.</p>
+</div>
+{% endfor %} 
