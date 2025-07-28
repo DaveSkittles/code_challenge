@@ -22,15 +22,15 @@ A secure, single-page web application for reviewing, annotating, and flagging me
 ## 🛠 Technology Stack
 
 **Backend:**
-- Django 4.2.9
+- Django
 - SQLite database
 - Python 3.x
 
 **Frontend:**
 - HTML5 & CSS3
-- Bootstrap 5.3.2
-- Alpine.js 3.13.3
-- HTMX 1.9.8
+- Bootstrap
+- Alpine.js
+- HTMX
 - Bootstrap Icons
 
 ## 📋 Installation & Setup
